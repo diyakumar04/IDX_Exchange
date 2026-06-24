@@ -1,0 +1,19 @@
+# Do not upload raw or processed MLS data
+*.csv
+*.xlsx
+*.xls
+
+# Local data/output folders
+data/
+outputs/
+
+# Python environment/cache files
+.venv/
+__pycache__/
+*.pyc
+
+# Mac system files
+.DS_Store
+
+# Tableau extracts
+*.hyper
