@@ -3,9 +3,10 @@ Week 2-3 Deliverable - Dataset Structuring and Validation (Sold + Listings)
 """
 
 import pandas as pd
-import os 
+import os
+from pathlib import Path 
 
-DELIVERABLES_FOLDER = "IDX_Deliverables"
+DELIVERABLES_FOLDER = str(Path.home() / "Downloads" / "IDX_Local_Data" / "drive-download-20260623T184602Z-3-001")
 NUMERIC_FIELDS = ['ClosePrice','LivingArea','DaysOnMarket']
 
 # 1 label --> (unfiltered filename, filtered filename)
@@ -26,7 +27,7 @@ def load_source(unfiltered_filename,filtered_filename):
         return pd.read_csv(unfiltered_path, low_memory=False), True
     
     print(f"No unfiltered file found at {unfiltered_path}.")
-    print("Falling back to filtered file:{filtered_path}")
+    print(f"Falling back to filtered file:{filtered_path}")
     return pd.read_csv(filtered_path,low_memory=False), False
 
 def validate_dataset(label, unfiltered_filename, filtered_filename):
@@ -62,47 +63,47 @@ def validate_dataset(label, unfiltered_filename, filtered_filename):
     print("\nNull-count summary table:")
     print(null_counts.to_string())
 
-#3 Missing value report - flag columns above 90% null
-missing_pct = (null_counts/len(df)*100).round(2)
-missing_report=pd.DataFrame({
-    'column':df.columns,
-    'null_count':null_counts.values,
-    'null_pct':missing_pct.values
-}).sort_values('null_pct',ascending=False)
+    #3 Missing value report - flag columns above 90% null
+    missing_pct = (null_counts/len(df)*100).round(2)
+    missing_report=pd.DataFrame({
+        'column':df.columns,
+        'null_count':null_counts.values,
+        'null_pct':missing_pct.values
+    }).sort_values('null_pct',ascending=False)
 
-high_missing=missing_report[missing_report['null_pct']>90]
-print(f"\nColumns above 90% null ({len(high_missing)} total):")
-if len(high_missing) > 0:
-    print(high_missing[['column,'null_pct]].to_string(index=False))
-else:
-    print(" None")
+    high_missing=missing_report[missing_report['null_pct']>90]
+    print(f"\nColumns above 90% null ({len(high_missing)} total):")
+    if len(high_missing) > 0:
+        print(high_missing[['column','null_pct']].to_string(index=False))
+    else:
+        print(" None")
 
-#4 Numeric distribution summary 
-print("\nNumeric distribution summary:")
-for field in NUMERIC_FIELDS:
-    if field not in df.columns:
-        print(f"    [{field}] not found in {label} dataset - skipping")
-        continue 
+    #4 Numeric distribution summary 
+    print("\nNumeric distribution summary:")
+    for field in NUMERIC_FIELDS:
+        if field not in df.columns:
+            print(f"    [{field}] not found in {label} dataset - skipping")
+            continue 
 
-    series = pd.to_numeric(df[field], errors+'coerce').dropna()
-    if len(series) == 0:
-        print(f"    [{field}] has no usable numeric data - skipping")
-        continue 
+        series = pd.to_numeric(df[field], errors='coerce').dropna()
+        if len(series) == 0:
+            print(f"    [{field}] has no usable numeric data - skipping")
+            continue 
 
-    print(f"\n  {field}")
-    print(f"    min:        {series.min():,.2f}")
-    print(f"    max:        {series.max():,.2f}")
-    print(f"    mean:        {series.mean():,.2f}")
-    print(f"    median:        {series.median():,.2f}")
-    print(f"    25th percentile:        {series.quantile(0.25):,.2f}")
-    print(f"    75th percentile:        {series.quantile(0.75):,.2f}")
-    print(f"    99th percentile:        {series.quantile(0.99):,.2f}")
+        print(f"\n  {field}")
+        print(f"    min:        {series.min():,.2f}")
+        print(f"    max:        {series.max():,.2f}")
+        print(f"    mean:        {series.mean():,.2f}")
+        print(f"    median:        {series.median():,.2f}")
+        print(f"    25th percentile:        {series.quantile(0.25):,.2f}")
+        print(f"    75th percentile:        {series.quantile(0.75):,.2f}")
+        print(f"    99th percentile:        {series.quantile(0.99):,.2f}")
 
-#5 Save the filtered dataset 
-output_path=os.path.join(DELIVERABLES_FOLDER, f"{var_name}_validated.csv")
-df.to_csv(output_path,index=False)
-print(f"\nSaved validated {label} dataset to {output_path} ({len(df):,} rows)")
-print()
+    #5 Save the filtered dataset 
+    output_path=os.path.join(DELIVERABLES_FOLDER, f"{var_name}_validated.csv")
+    df.to_csv(output_path,index=False)
+    print(f"\nSaved validated {label} dataset to {output_path} ({len(df):,} rows)")
+    print()
 
 def main():
     for label, (unfiltered_filename, filtered_filename) in DATASETS.items():

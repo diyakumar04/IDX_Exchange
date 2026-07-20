@@ -12,7 +12,6 @@ from pathlib import Path
 # Raw CSV files stored locally 
 # Some "_filled" files have two extra columns at the end 
 # If a "_filled" file is used, the last two columns are dropped 
-# Requested range through 202605 unavailable 
 
 # Local data folder on device 
 RAW_DATA_DIR = Path.home() / "Downloads" / "IDX_Local_Data" / "drive-download-20260623T184602Z-3-001"
