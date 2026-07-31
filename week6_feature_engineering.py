@@ -8,7 +8,7 @@ from pathlib import Path
 
 DELIVERABLES_FOLDER = str(Path.home() / "Downloads" / "IDX_Local_Data" / "drive-download-20260623T184602Z-3-001")
 INPUT_FILE = "sold_cleaned.csv"
-SCHOOL_DISTRICT_URL = "https://gis.data.ca.gov/api/download/v1/items/b0e3b936426a47ce9d9a2e77e2bb86cc/geojson?layers=0"
+SCHOOL_DISTRICT_PATH = str(Path.home() / "Downloads" / "DistrictAreas2526_-284845464123469011.geojson")
 
 def load_sold_data():
     input_path = Path(DELIVERABLES_FOLDER) / INPUT_FILE
@@ -65,10 +65,14 @@ def add_school_districts(df):
     boundaries to assign a SchoolDistrictName.
     """
     print("\nAdding school districts via spatial join...")
-    print(f"Fetching school district boundaries from {SCHOOL_DISTRICT_URL}")
+    print(f"Fetching school district boundaries from {SCHOOL_DISTRICT_PATH}")
 
-    districts = gpd.read_file(SCHOOL_DISTRICT_URL)
+    districts = gpd.read_file(SCHOOL_DISTRICT_PATH)
     print(f"Loaded {len(districts):,} school district boundary records")
+
+    before_filter = len(districts)
+    districts = districts[districts['DistrictType'] == 'Unified'].copy()
+    print(f"Filtered to Unified districts: {len(districts):,} of {before_filter:,} records")
 
     if districts.crs is None:
         districts = districts.set_crs("EPSG:4326")
